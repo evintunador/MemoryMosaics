@@ -38,7 +38,7 @@ def generate(
     model,  # function that should output (batch_size,seq_len,vocab_len) tensor and a tensor w/ a single loss value (not used)
     tokenizer,
     max_gen_len: int = None,
-    memory_saver_div: int = 1, # defaults to full max_seq_len**2 memory use. must be power of 2
+    memory_saver_div: int = None, # not applicable for this model. left the parameter here but it returns an error if used
     temperature=0.7,
     top_p=0.9,
     top_k=None,
@@ -46,22 +46,19 @@ def generate(
     """Generate text from a prompt using the model and sampling settings."""
     vocab_len = tokenizer.vocab_len
     max_seq_len = model.max_seq_len
-    assert ((memory_saver_div & (memory_saver_div-1)) == 0) & (memory_saver_div > 0), f'memory_saver_div {memory_saver_div} must be power of 2'
-    max_context_window = max_seq_len // memory_saver_div
-    if memory_saver_div != 1:
-        print(f'maximum attention matrix size in memory will be {max_context_window}x{max_seq_len} rather than {max_seq_len}x{max_seq_len}\n')
+    if memory_saver_div is not None:
+        print(f'key-value caching is not enabled for this model; memory_saver_div = {memory_saver_div} is useless')
     if top_k is None:
         top_k = tokenizer.vocab_len
 
     tokens = tokenizer.encode(prompt)
-    max_gen_len = max_seq_len - len(tokens) if max_gen_len is None else max_gen_len
+    max_gen_len = max_seq_len - len(tokens)
     tokens = torch.tensor([tokens], device=model.device).to(torch.long)
     assert tokens.shape[0] == 1, f'batched inference is not currently supported.'
 
-    cache_len = max(tokens.shape[1] - max_context_window, 0)
     for i in range(max_gen_len):
         with torch.no_grad():
-            logits, _ = model(tokens[:,-max_context_window:], cache_len)
+            logits, _ = model(tokens[:,-max_seq_len:])
           
         # turn the logits into probabilities and sample from them
         next_token = sampler(logits, temperature, top_p, top_k, vocab_len, model.device)
@@ -70,9 +67,5 @@ def generate(
         if next_token == tokenizer.eos_id: break
         # otherwise, add our new token to the sequence
         tokens = torch.cat([tokens, next_token], dim=-1)
-
-        # update our kv cache length
-        if tokens.shape[1] >= max_context_window:
-            cache_len += 1
     
     return tokenizer.decode(tokens.squeeze(0).tolist())
