@@ -7,3 +7,4 @@ networkx
 sympy
 torch
 typing_extensions
+datasets

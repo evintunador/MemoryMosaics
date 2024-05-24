@@ -10,7 +10,7 @@ class ModelConfig:
     Yes I know dropout_rate should probably be in TrainConfig but it was easier to implement from here
     """
     # general hyperparameters
-    dim: int = 128
+    dim: int = 80
     device: str = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu' 
     dropout_rate = 0.1 # percent of neurons to set to 0 during training as a way of adding randomness & improving generalization
 
@@ -24,12 +24,12 @@ class ModelConfig:
     second_resid_norm: bool = False # True adds an extra Norm after the attn & MLP, like in Grok. Only recommended if using RMSNorm
 
     # Memory Mosaic (mm)
-    num_heads: int = 4
+    num_heads: int = 2
     head_dim: int = dim // num_heads # the mm authors only tried dim // num_heads
-    max_seq_len: int = 128 # 512 is the most my 8gb of ram can handle
+    max_seq_len: int = 512 # 512 is the most my 8gb of ram can handle
     mm_bias: bool = False # whether to use bias in mm matrices
     pmem_size: int = 2688 // (1024 // dim) # this calculation keeps the same ratio as what they used in their model
-    pmem_count: int = 2
+    pmem_count: int = 1
     # might I split these hyperparameters up to be separate for context vs persistent memory?
     # also could mix & match gpt parts with mm parts and see how that goes
 
@@ -52,7 +52,7 @@ class TrainConfig:
     batch_size: int = 32
     
     # total number of batches to run over the course of training
-    max_iters: int = 100 # i recommend at least 1_000
+    max_iters: int = 4_000 # i recommend at least 1_000
     # how often to print out an update on how training is going
     eval_interval: int = max_iters // 100 # doing this too often slows things down hella but also gives detailed log data
     # how many samples to take at each evaluation. more means a more accurate loss/perplexity calculation
