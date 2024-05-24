@@ -1,4 +1,4 @@
-# MemoryMosaics *(IN-PROGRESS)*
+# MemoryMosaics *(IN-PROGRESS: code is good but no models trained yet)*
 ## about
 This repo is built fundamentally off of the template repo [templateGPT](https://github.com/evintunador/templateGPT) which has a corresponding video guide [here](https://www.youtube.com/watch?v=s9kQvDsWnbc). It's designed as a way for me to experiment with the new architecture [Memory Mosaics](https://arxiv.org/abs/2405.06394), an alternative to transformers. The code that diverges from templateGPT is mostly copied & slightly edited from [the paper author's original repo](https://github.com/facebookresearch/MemoryMosaics/blob/main/nanoMosaics/mosaic_model.py). 
 
@@ -23,9 +23,8 @@ This repo is part of a larger project of mine called [micro_model_sandbox](https
 - `modules/`: where all of the code for the actual model goes
     - `layer.py`: defines each residual connection layer of our GPT
     - `logging.py`: defines the `LoggingModule` class, a wrapper that you should use instead of pytorch's `nn.module` in order to facilitate easy demonstration of how tensor shapes change throughout a given module
-    - `mlp.py`: a two-layer multi-layer perceptron that's not used in this model, but i've left it in here in cases I want to experiment around with mixing the transformer & mm architecture
-    - `model.py`: the primary class for our GPT
-    - `mqa.py`: [multi-query attention](https://arxiv.org/abs/1911.02150) with pre-computed [rotary positional encodings](https://arxiv.org/abs/2104.09864) that's not used in this model, but i've left it in here in cases I want to experiment around with mixing the transformer & mm architecture
+    - `model.py`: the primary class for our Memory Mosaics Model
+    - `memory_mosaics.py`: the file with all the interesting code that makes it different from a GPT
     - `norm.py`: a norm module with an optional affine layer that allows you to switch between [RMSNorm](https://arxiv.org/abs/1910.07467), [LayerNorm](https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html) and [CosineNorm](https://arxiv.org/pdf/1702.05870) easily using a setting over in `config.py`. Adding different normalization methods is also absurdly easy
 - `tokenizers/`: a folder where you store your tokenizers
     - `bpe_v1/`: a [byte-pair encoding](https://huggingface.co/learn/nlp-course/chapter6/5) tokenizer except I use the characters that show up in TinyStories instead of bytes. This is the one that gets used in all the models that are currently trained, but if you're training a new model and don't care about comparing it against the pre-existing ones then I recommend using `bpe_v2/`
@@ -53,7 +52,9 @@ This repo is part of a larger project of mine called [micro_model_sandbox](https
 - `train.py`: functions for training a model, used in `train.ipynb`
 
 ## definite eventual TODOs
-- [ ] switch over from a transformer to a Memory Mosaics model
+- [x] build out the Memory Mosaics model
+- [ ] train one & compare it to a model in templateGPT
+- [ ] train a couple to test out ideal hyperparameters
 
 ### potential future TODOs
 - [ ] test out mixtures of the memory mosaics & transformer architecture. What i'm specifically thinking is using an MLP instead of the `PersistentMem` module since they're supposed to do analogous things but the latter consumes hella ram with its seq_len x seq_len matrices like an attention module
