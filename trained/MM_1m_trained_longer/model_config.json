@@ -1,0 +1,1 @@
+{"dim": 80, "device": "cpu", "tokenizer": "bpe_v1", "vocab_len": 8192, "num_layers": 4, "second_resid_norm": false, "num_heads": 2, "head_dim": 40, "max_seq_len": 512, "mm_bias": false, "pmem_size": 224, "pmem_count": 1, "scale_first_resid": true, "norm_type": "RMSNorm", "norm_affine": true, "norm_bias": true, "eps": 1e-06}

@@ -52,7 +52,7 @@ class TrainConfig:
     batch_size: int = 32
     
     # total number of batches to run over the course of training
-    max_iters: int = 4_000 # i recommend at least 1_000
+    max_iters: int = 2_000 # i recommend at least 1_000
     # how often to print out an update on how training is going
     eval_interval: int = max_iters // 100 # doing this too often slows things down hella but also gives detailed log data
     # how many samples to take at each evaluation. more means a more accurate loss/perplexity calculation
@@ -72,7 +72,7 @@ class TrainConfig:
     # number of iterations for a linear warmup from lr_min to lr_max
     warmup_iters: int = int(max_iters * 0.01) # if you don't want to use a lr warmup, set = 0
     # number of iterations for a constant learning rate of lr_min at the end of training
-    final_flat_iters: int = int(max_iters * 0.1) # if you don't want to use a final flat lr at the end, set = 0
+    final_flat_iters: int = int(max_iters * 0.2) # if you don't want to use a final flat lr at the end, set = 0
     
     # type of annealment to use. Annealment is when the learning rate decreases over the course of training
     anneal_type: str = 'cos' # options: 'cos'(recommended) and 'lin'
